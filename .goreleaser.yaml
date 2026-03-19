@@ -1,0 +1,54 @@
+version: 2
+
+project_name: desktopify-lite
+
+before:
+  hooks:
+    - go test ./...
+    - go vet ./...
+
+builds:
+  - id: desktopify-lite
+    main: .
+    binary: desktopify-lite
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - >-
+        -s -w
+        -X github.com/miniguys/desktopify-lite/internal/app.version={{ .Version }}
+        -X github.com/miniguys/desktopify-lite/internal/app.commit={{ .Commit }}
+        -X github.com/miniguys/desktopify-lite/internal/app.buildDate={{ .Date }}
+        -X github.com/miniguys/desktopify-lite/internal/app.author=miniguys
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: default
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    formats: [tar.gz]
+    files:
+      - README.md
+      - LICENSE
+      - CHANGELOG.md
+      - RELEASE.md
+      - SECURITY.md
+      - SUPPORT.md
+
+source:
+  enabled: true
+  name_template: '{{ .ProjectName }}_{{ .Version }}_source'
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  use: github-native
+
+sboms:
+  - artifacts: archive

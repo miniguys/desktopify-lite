@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        launcher_case:
+          - browser: chromium
+            url_template: --app={url}
+            extra_flags: --profile-directory=Default
+          - browser: google-chrome-stable
+            url_template: '{url}'
+            extra_flags: --new-window
+          - browser: brave-browser
+            url_template: '--new-window --app={url}'
+            extra_flags: --incognito
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install desktop-file-validate
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y desktop-file-utils
+
+      - name: Check formatting
+        run: |
+          unformatted=$(find . -name '*.go' -not -path './.git/*' -print0 | xargs -0 gofmt -l)
+          if [ -n "$unformatted" ]; then
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run tests with race detector
+        run: go test -race ./...
+
+      - name: Run vet
+        run: go vet ./...
+
+      - name: Build with trimpath
+        run: go build -trimpath ./...
+
+      - name: Shell syntax check
+        run: |
+          bash -n scripts/*.sh
+
+      - name: Validate generated .desktop file
+        env:
+          BROWSER_BIN: ${{ matrix.launcher_case.browser }}
+          URL_TEMPLATE: ${{ matrix.launcher_case.url_template }}
+          EXTRA_FLAGS: ${{ matrix.launcher_case.extra_flags }}
+        run: ./scripts/validate-generated-desktop.sh

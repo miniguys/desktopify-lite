@@ -1,0 +1,110 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  attestations: write
+  id-token: write
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        launcher_case:
+          - browser: chromium
+            url_template: --app={url}
+            extra_flags: --profile-directory=Default
+          - browser: google-chrome-stable
+            url_template: '{url}'
+            extra_flags: --new-window
+          - browser: brave-browser
+            url_template: '--new-window --app={url}'
+            extra_flags: --incognito
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install desktop-file-validate
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y desktop-file-utils
+
+      - name: Check formatting
+        run: |
+          unformatted=$(find . -name '*.go' -not -path './.git/*' -print0 | xargs -0 gofmt -l)
+          if [ -n "$unformatted" ]; then
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run tests with race detector
+        run: go test -race ./...
+
+      - name: Run vet
+        run: go vet ./...
+
+      - name: Build with trimpath
+        run: go build -trimpath ./...
+
+      - name: Shell syntax check
+        run: |
+          bash -n scripts/*.sh
+
+      - name: Validate generated .desktop file
+        env:
+          BROWSER_BIN: ${{ matrix.launcher_case.browser }}
+          URL_TEMPLATE: ${{ matrix.launcher_case.url_template }}
+          EXTRA_FLAGS: ${{ matrix.launcher_case.extra_flags }}
+        run: ./scripts/validate-generated-desktop.sh
+
+  goreleaser:
+    needs: preflight
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify checksums
+        run: ./scripts/verify-release-checksums.sh
+
+      - name: Attest checksums manifest
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/checksums.txt

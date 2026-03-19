@@ -1,0 +1,18 @@
+# binaries
+/desktopify-lite
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# local config
+/config
+config.local
+
+# release artifacts
+/dist/
+
+# AUR build leftovers
+/packaging/aur/desktopify-lite/pkg/
+/packaging/aur/desktopify-lite/src/
