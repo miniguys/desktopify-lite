@@ -33,16 +33,45 @@ func defaultVersion() string {
 }
 
 func init() {
-	items := []KV{
-		{K: "Author", V: author},
-		{K: "Version", V: version},
-		{K: "Commit", V: commit},
-		{K: "BuildDate", V: buildDate},
-		{
-			K: "Description",
-			V: "Generates .desktop file for selected\nwebsite.\nCan be configured with config file.",
-		},
+	if info, ok := debug.ReadBuildInfo(); ok {
+		if version == "dev" && info.Main.Version != "(devel)" && info.Main.Version != "" {
+			version = info.Main.Version
+		}
+
+		for _, setting := range info.Settings {
+			switch setting.Key {
+			case "vcs.revision":
+				if commit == "unknown" {
+					commit = setting.Value
+					if len(commit) > 7 {
+						commit = commit[:7]
+					}
+				}
+			case "vcs.time":
+				if buildDate == "unknown" {
+					buildDate = setting.Value
+				}
+			}
+		}
 	}
+
+	var items []KV
+
+	if author != "" {
+		items = append(items, KV{K: "Author", V: author})
+	}
+
+	items = append(items, KV{K: "Version", V: version})
+
+	if commit != "unknown" && commit != "" {
+		items = append(items, KV{K: "Commit", V: commit})
+	}
+
+	if buildDate != "unknown" && buildDate != "" {
+		items = append(items, KV{K: "BuildDate", V: buildDate})
+	}
+
+	items = append(items, KV{K: "Description", V: "Generates .desktop file for selected\nwebsite.\nCan be configured with config file."})
 
 	infoBlock = "\n" + renderKVBlock(items, styleInfoName, styleInfoValue, infoLeftPad)
 }
