@@ -69,7 +69,9 @@ jobs:
           BROWSER_BIN: ${{ matrix.launcher_case.browser }}
           URL_TEMPLATE: ${{ matrix.launcher_case.url_template }}
           EXTRA_FLAGS: ${{ matrix.launcher_case.extra_flags }}
-        run: ./scripts/validate-generated-desktop.sh
+        run: |
+          chmod +x ./scripts/validate-generated-desktop.sh
+          ./scripts/validate-generated-desktop.sh
 
   goreleaser:
     needs: preflight
