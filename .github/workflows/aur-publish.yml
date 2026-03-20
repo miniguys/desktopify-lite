@@ -17,32 +17,31 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+
       - name: Publish to AUR
         run: |
-          # Add AUR to known hosts
+          # Add AUR to known hosts to prevent SSH confirmation prompts
           ssh-keyscan -t ed25519 aur.archlinux.org >> ~/.ssh/known_hosts
 
-          # Setup git identity
+          # Setup git identity for the AUR repository
           git config --global user.name "kaine-killian"
           git config --global user.email "kaine-killian@users.noreply.github.com"
 
-          # Clone AUR repository
+          # Clone the AUR repository using the SSH agent
           git clone ssh://aur@aur.archlinux.org/desktopify-lite.git /tmp/aur-repo
 
-          # Copy PKGBUILD to the temp location
+          # Copy PKGBUILD from the project repository to the temporary AUR repo
           cp ./packaging/aur/desktopify-lite/PKGBUILD /tmp/aur-repo/
 
           # AUTO-UPDATE VERSION: Strip 'v' from tag (v1.0.2 -> 1.0.2) and update PKGBUILD
           NEW_VER=$(echo "${GITHUB_REF_NAME}" | sed 's/^v//')
           sed -i "s/^pkgver=.*/pkgver=${NEW_VER}/" /tmp/aur-repo/PKGBUILD
-
-          # Optional: Reset pkgrel to 1 on every new version
           sed -i "s/^pkgrel=.*/pkgrel=1/" /tmp/aur-repo/PKGBUILD
 
-          # Regenerate .SRCINFO using Arch container
-          # Note: we need to update checksums too if the source changed
+          # Regenerate .SRCINFO and update checksums using official Arch Linux container
+          # Added 'pacman-contrib' to provide 'updpkgsums'
           docker run --rm -v /tmp/aur-repo:/pkg archlinux:latest bash -c "
-            pacman -Sy --noconfirm binutils sudo &&
+            pacman -Sy --noconfirm binutils sudo pacman-contrib &&
             useradd -m builder &&
             chown -R builder:builder /pkg &&
             cd /pkg &&
@@ -50,10 +49,10 @@ jobs:
             sudo -u builder makepkg --printsrcinfo > .SRCINFO
           "
 
-          # Fix permissions after Docker
+          # Fix file ownership after Docker execution
           sudo chown -R $USER:$USER /tmp/aur-repo
 
-          # Commit and push changes
+          # Navigate to the AUR repo, stage changes, and push
           cd /tmp/aur-repo
           git add PKGBUILD .SRCINFO
 
