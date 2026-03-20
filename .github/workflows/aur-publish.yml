@@ -39,9 +39,9 @@ jobs:
           sed -i "s/^pkgrel=.*/pkgrel=1/" /tmp/aur-repo/PKGBUILD
 
           # Regenerate .SRCINFO and update checksums using official Arch Linux container
-          # Added 'pacman-contrib' to provide 'updpkgsums'
+          # Added 'git' because updpkgsums needs it to fetch git sources
           docker run --rm -v /tmp/aur-repo:/pkg archlinux:latest bash -c "
-            pacman -Sy --noconfirm binutils sudo pacman-contrib &&
+            pacman -Sy --noconfirm binutils sudo pacman-contrib git &&
             useradd -m builder &&
             chown -R builder:builder /pkg &&
             cd /pkg &&
@@ -49,7 +49,7 @@ jobs:
             sudo -u builder makepkg --printsrcinfo > .SRCINFO
           "
 
-          # Fix file ownership after Docker execution
+          # IMPORTANT: Fix file ownership after Docker execution
           sudo chown -R $USER:$USER /tmp/aur-repo
 
           # Navigate to the AUR repo, stage changes, and push
