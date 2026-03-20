@@ -117,7 +117,7 @@ func run(stdin io.Reader) error {
 		}
 	}
 
-	fmt.Println(styleSuccess.Render(" Success! App '" + in.Name + "' is ready."))
+	fmt.Println(styleSuccess.Render("✔  Success! App '" + in.Name + "' is ready."))
 	fmt.Println(styleInfoName.Render(" Path: "), styleInfoValue.Render(desktopPath))
 	fmt.Println()
 
