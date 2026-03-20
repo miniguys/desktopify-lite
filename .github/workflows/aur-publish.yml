@@ -13,29 +13,25 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup SSH Keys
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+
       - name: Publish to AUR
-        env:
-          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
         run: |
-          # Настройка SSH ключа
-          mkdir -p ~/.ssh
-          echo "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur
-          chmod 600 ~/.ssh/aur
+          # Добавляем AUR в известные хосты
           ssh-keyscan -t ed25519 aur.archlinux.org >> ~/.ssh/known_hosts
 
-          # Настройка Git
           git config --global user.name "kaine-killian"
           git config --global user.email "kaine-killian@users.noreply.github.com"
-          export GIT_SSH_COMMAND="ssh -i ~/.ssh/aur -o StrictHostKeyChecking=no"
 
-          # Клонирование AUR репозитория во временную папку
+          # Клонируем через SSH (ssh-agent сам подсунет ключ)
           git clone ssh://aur@aur.archlinux.org/desktopify-lite.git /tmp/aur-repo
 
-          # Копирование PKGBUILD и .SRCINFO из твоего проекта
           cp ./packaging/aur/desktopify-lite/PKGBUILD /tmp/aur-repo/
           cp ./packaging/aur/desktopify-lite/.SRCINFO /tmp/aur-repo/
 
-          # Пуш в AUR
           cd /tmp/aur-repo
           git add PKGBUILD .SRCINFO
           if git diff --cached --quiet; then
