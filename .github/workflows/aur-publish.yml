@@ -13,13 +13,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Publish to AUR
-        uses: KSXPC/github-actions-deploy-aur@v3
+      - name: Publish AUR package
+        uses: 20137/aurpublish@v1
         with:
           pkgname: desktopify-lite
-          # Укажи путь, где в репе лежит твой PKGBUILD
           pkgbuild: ./packaging/aur/desktopify-lite/PKGBUILD
-          commit_username: kaine-killian
-          commit_email: kaine-killian@users.noreply.github.com
+          commit_username: kainekillian
+          commit_email: kainekillian@proton.me
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: "Update to ${{ github.ref_name }}"
