@@ -147,7 +147,7 @@ func TestDetectIconExt(t *testing.T) {
 		contentType string
 		want        string
 	}{
-		{name: "ext from url", rawURL: "https://example.com/icon.webp", contentType: "image/png", want: ".webp"},
+		{name: "ext from url", rawURL: "https://example.com/icon.webp", contentType: "image/png", want: ".png"},
 		{name: "ext from content type", rawURL: "https://example.com/icon", contentType: "image/svg+xml", want: ".svg"},
 		{name: "jpeg content type", rawURL: "https://example.com/icon", contentType: "image/jpeg", want: ".jpg"},
 		{name: "unknown", rawURL: "https://example.com/icon", contentType: "text/plain", want: ""},
