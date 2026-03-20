@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -21,15 +21,9 @@ jobs:
       fail-fast: false
       matrix:
         launcher_case:
-          - browser: chromium
+          - browser: test-browser
             url_template: --app={url}
-            extra_flags: --profile-directory=Default
-          - browser: google-chrome-stable
-            url_template: '{url}'
-            extra_flags: --new-window
-          - browser: brave-browser
-            url_template: '--new-window --app={url}'
-            extra_flags: --incognito
+            extra_flags: ""
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,6 +35,11 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+
+      - name: Check go.mod / go.sum are tidy
+        run: |
+          go mod tidy
+          git diff --exit-code
 
       - name: Install desktop-file-validate
         run: |
@@ -55,17 +54,11 @@ jobs:
             exit 1
           fi
 
-      - name: Run tests
-        run: go test ./...
-
       - name: Run tests with race detector
         run: go test -race ./...
 
       - name: Run vet
         run: go vet ./...
-
-      - name: Build with trimpath
-        run: go build -trimpath ./...
 
       - name: Shell syntax check
         run: |

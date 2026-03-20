@@ -5,7 +5,7 @@ on:
     branches: ["main", "master"]
   pull_request:
   schedule:
-    - cron: '17 3 * * 1'
+    - cron: "17 3 * * 1"
 
 permissions:
   actions: read
@@ -29,8 +29,8 @@ jobs:
         with:
           languages: ${{ matrix.language }}
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+      - name: Build
+        run: go build ./...
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
