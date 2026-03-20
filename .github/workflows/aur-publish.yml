@@ -20,20 +20,32 @@ jobs:
 
       - name: Publish to AUR
         run: |
-          # Добавляем AUR в известные хосты
+          # Add AUR to known hosts
           ssh-keyscan -t ed25519 aur.archlinux.org >> ~/.ssh/known_hosts
 
+          # Setup git identity
           git config --global user.name "kaine-killian"
           git config --global user.email "kaine-killian@users.noreply.github.com"
 
-          # Клонируем через SSH (ssh-agent сам подсунет ключ)
+          # Clone AUR repository
           git clone ssh://aur@aur.archlinux.org/desktopify-lite.git /tmp/aur-repo
 
+          # Copy PKGBUILD from the project to the AUR repo
           cp ./packaging/aur/desktopify-lite/PKGBUILD /tmp/aur-repo/
-          cp ./packaging/aur/desktopify-lite/.SRCINFO /tmp/aur-repo/
 
+          # Regenerate .SRCINFO using official Arch Linux container
+          docker run --rm -v /tmp/aur-repo:/pkg archlinux:latest bash -c "
+            pacman -Sy --noconfirm binutils sudo &&
+            useradd -m builder &&
+            chown -R builder:builder /pkg &&
+            cd /pkg &&
+            sudo -u builder makepkg --printsrcinfo > .SRCINFO
+          "
+
+          # Commit and push changes
           cd /tmp/aur-repo
           git add PKGBUILD .SRCINFO
+
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
