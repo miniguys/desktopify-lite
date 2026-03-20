@@ -31,7 +31,7 @@ See `SUPPORT.md` for the support policy and `RELEASE.md` for the release checkli
 
 ```bash
 go install github.com/miniguys/desktopify-lite@latest
-export PATH=$PATH:$(go env GOPATH)/bin # if you don't have ~/go/bin in PATH
+echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc && source ~/.bashrc #replace bash with your terminal (zsh, etc.)
 ```
 
 Or build locally:
