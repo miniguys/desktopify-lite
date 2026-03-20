@@ -1,3 +1,4 @@
+![Desktopify Lite Preview](assets/preview.gif)
 # desktopify-lite
 
 Stable CLI tool that generates a Linux `.desktop` launcher for a website.
