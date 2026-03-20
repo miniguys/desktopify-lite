@@ -97,7 +97,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify checksums
-        run: ./scripts/verify-release-checksums.sh
+        run: |
+          chmod +x ./scripts/verify-release-checksums.sh
+          ./scripts/verify-release-checksums.sh
 
       - name: Attest checksums manifest
         uses: actions/attest-build-provenance@v2

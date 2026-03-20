@@ -1,0 +1,26 @@
+name: Update AUR
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  aur-publish:
+    needs: goreleaser # Ждем, пока создастся GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Publish to AUR
+        uses: KSXPC/github-actions-deploy-aur@v3
+        with:
+          pkgname: desktopify-lite
+          # Укажи путь, где в репе лежит твой PKGBUILD
+          pkgbuild: ./packaging/aur/desktopify-lite/PKGBUILD
+          commit_username: kaine-killian
+          commit_email: kaine-killian@users.noreply.github.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to ${{ github.ref_name }}"
