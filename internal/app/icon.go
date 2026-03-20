@@ -23,9 +23,7 @@ import (
 	"time"
 )
 
-var (
-	errInvalidIconURL = errors.New("invalid icon url")
-)
+var errInvalidIconURL = errors.New("invalid icon url")
 
 const maxIconBytes = 10 << 20
 
@@ -506,11 +504,11 @@ func iconExtPriority(ext string) int {
 		return 0
 	case ".png":
 		return 1
-	case ".webp":
-		return 2
 	case ".jpg", ".jpeg":
-		return 3
+		return 2
 	case ".ico":
+		return 3
+	case ".webp":
 		return 4
 	default:
 		return 5
@@ -556,7 +554,7 @@ func detectIconExt(rawURL, contentType string) string {
 func normalizeIconExt(ext string) string {
 	ext = strings.ToLower(ext)
 	switch ext {
-	case ".svg", ".png", ".jpg", ".jpeg", ".webp", ".ico":
+	case ".svg", ".png", ".jpg", ".jpeg", ".ico":
 		return ext
 	default:
 		return ""
@@ -853,6 +851,4 @@ func defaultUserAgent() string {
 	return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36 desktopify-lite/" + version
 }
 
-var (
-	osMkdirAll = func(p string, perm os.FileMode) error { return os.MkdirAll(p, perm) }
-)
+var osMkdirAll = func(p string, perm os.FileMode) error { return os.MkdirAll(p, perm) }
