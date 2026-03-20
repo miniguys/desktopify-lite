@@ -20,20 +20,21 @@ jobs:
 
       - name: Publish to AUR
         run: |
-          # Add AUR to known hosts
+          # Add AUR to known hosts to prevent SSH confirmation prompts
           ssh-keyscan -t ed25519 aur.archlinux.org >> ~/.ssh/known_hosts
 
-          # Setup git identity
+          # Setup git identity for the AUR repository
           git config --global user.name "kaine-killian"
           git config --global user.email "kaine-killian@users.noreply.github.com"
 
-          # Clone AUR repository
+          # Clone the AUR repository using the SSH agent
           git clone ssh://aur@aur.archlinux.org/desktopify-lite.git /tmp/aur-repo
 
-          # Copy PKGBUILD from the project to the AUR repo
+          # Sync PKGBUILD from the project repository to the temporary AUR repo
           cp ./packaging/aur/desktopify-lite/PKGBUILD /tmp/aur-repo/
 
-          # Regenerate .SRCINFO using official Arch Linux container
+          # Run official Arch Linux container to regenerate .SRCINFO
+          # We use Docker because the runner environment (Ubuntu) lacks 'makepkg'
           docker run --rm -v /tmp/aur-repo:/pkg archlinux:latest bash -c "
             pacman -Sy --noconfirm binutils sudo &&
             useradd -m builder &&
@@ -42,7 +43,11 @@ jobs:
             sudo -u builder makepkg --printsrcinfo > .SRCINFO
           "
 
-          # Commit and push changes
+          # IMPORTANT: Fix file ownership after Docker execution
+          # Files created in the volume belong to root; we must reclaim them for the runner user
+          sudo chown -R $USER:$USER /tmp/aur-repo
+
+          # Navigate to the AUR repo, stage changes, and push
           cd /tmp/aur-repo
           git add PKGBUILD .SRCINFO
 
