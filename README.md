@@ -29,6 +29,12 @@ See `SUPPORT.md` for the support policy and `RELEASE.md` for the release checkli
 
 ## Install
 
+Official **Arch User Repository** package
+```bash
+yay -S desktopify-lite
+```
+
+Or just Go Install
 ```bash
 go install github.com/miniguys/desktopify-lite@latest
 echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc && source ~/.bashrc #replace bash with your terminal (zsh, etc.)
