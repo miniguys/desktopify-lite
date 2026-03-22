@@ -37,6 +37,28 @@ make build
 
 ---
 
+## Set your browser first
+
+The default browser is `chromium`. If you use something else, set it once before creating any launchers:
+
+```bash
+# Firefox — requires --kiosk since --app= is not supported
+desktopify-lite config --default_browser='firefox' --default_url_template="--kiosk '{url}'"
+
+# Chromium, Chrome, Brave, Thorium, Vivaldi — --app= works out of the box
+desktopify-lite config --default_browser='brave'
+# desktopify-lite config --default_browser='google-chrome'
+# desktopify-lite config --default_browser='thorium'
+# desktopify-lite config --default_browser='vivaldi'
+
+# Microsoft Edge — supports --app= but also has its own kiosk mode
+desktopify-lite config --default_browser='microsoft-edge'
+```
+
+You only need to do this once — it's saved to your config file and used for all future launchers.
+
+---
+
 ## Why not just write the `.desktop` file by hand?
 
 You can. It takes about 5 minutes once, and 5 minutes again on each new machine, and another 5 when you forget the icon flags syntax. `desktopify-lite` turns that into one command you can put in your dotfiles setup script and never think about again.
