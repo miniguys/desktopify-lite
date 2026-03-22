@@ -24,10 +24,14 @@ yay -S desktopify-lite
 **Go install**
 ```bash
 go install github.com/miniguys/desktopify-lite@latest
+# Replace `.bashrc` with your shell config like `.zshrc` if needed
+echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc && source ~/.bashrc
 ```
 
 **Build from source**
 ```bash
+git clone https://github.com/miniguys/desktopify-lite
+cd desktopify-lite
 make build
 ```
 
