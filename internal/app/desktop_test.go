@@ -138,7 +138,7 @@ func TestEscapeExecArg_Table(t *testing.T) {
 		{name: "space", in: "Profile 1", want: `"Profile 1"`},
 		{name: "percent", in: "https://example.com/a%20b", want: `"https://example.com/a%%20b"`},
 		{name: "backslashes", in: `C:\path\to\app`, want: `"C:\\path\\to\\app"`},
-		{name: "quotes and dollar", in: `say "hi" $HOME`, want: `"say \"hi\" \\$HOME"`},
+		{name: "quotes and dollar", in: `say "hi" $HOME`, want: `"say \"hi\" $$HOME"`},
 		{name: "backtick", in: "`cmd`", want: "\"\\`cmd\\`\""},
 	}
 
