@@ -249,7 +249,7 @@ func escapeExecArg(s string) string {
 	replacer := strings.NewReplacer(
 		"\\", "\\\\",
 		"\"", "\\\"",
-		"$", "\\\\$",
+		"$", "$$",
 		"`", "\\`",
 	)
 	return `"` + replacer.Replace(s) + `"`
