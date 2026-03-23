@@ -26,6 +26,11 @@ var (
 			Padding(0, 1).
 			SetString("✘")
 
+	styleWarning = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#F2BD38")).
+			Padding(0, 1).
+			SetString("✘")
+
 	styleProcess = lipgloss.NewStyle().
 			Faint(true).
 			Foreground(lipgloss.Color("#f0f0f033"))

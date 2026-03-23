@@ -90,8 +90,8 @@ func run(stdin io.Reader) error {
 		iconRef, err = ResolveIcon(in, paths, cfg, effectiveProxy)
 		if err != nil && !in.IconURLExplicit {
 			if runtimeOpts.NonInteractive {
-				fmt.Fprintf(os.Stderr, "warning: icon auto-discovery failed for %q: %v\n", in.URL, err)
-				fmt.Fprintln(os.Stderr, "warning: continuing without an icon")
+				fmt.Fprintln(os.Stderr, styleWarning.Render(" Warning:"), "icon auto-discovery failed for", in.URL, err)
+				fmt.Fprintln(os.Stderr, styleWarning.Render(" Warning:"), "continuing without an icon")
 			} else {
 				fmt.Println(styleError.Render(fmt.Sprintf("%v", err)))
 				fmt.Println(styleInfoName.Render(" Skipping icon..."))
